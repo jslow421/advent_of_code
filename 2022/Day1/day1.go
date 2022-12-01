@@ -7,6 +7,7 @@ import (
 	"os"
 	"sort"
 	"strconv"
+	"time"
 )
 
 type Elf struct {
@@ -30,8 +31,7 @@ type Entry struct {
 }
 
 func parseInputFile() (elves []Elf) {
-	pwd, _ := os.Getwd()
-	f, err := os.Open(pwd + "/2022/Day1/input.txt")
+	f, err := os.Open("./2022/Day1/input.txt")
 
 	if err != nil {
 		log.Fatal(err)
@@ -80,6 +80,7 @@ func calculateTotalForGroup(elves []Elf) (totalCalories int64) {
 }
 
 func main() {
+	start := time.Now()
 	elves := parseInputFile()
 	sortElvesByProduction(elves)
 	total := calculateTotalForGroup(elves[:3])
@@ -89,4 +90,5 @@ func main() {
 		fmt.Println("")
 	}
 	fmt.Println("Total for top 3: ", total)
+	fmt.Println(time.Since(start))
 }
