@@ -24,10 +24,6 @@ const (
 )
 
 func calculateOutcomeAndPoints(input string, opponent string) (outcome outcome, points int) {
-	if input == opponent {
-		outcome = tie
-		points += 3
-	}
 
 	switch input {
 	case "Y":
@@ -35,23 +31,37 @@ func calculateOutcomeAndPoints(input string, opponent string) (outcome outcome, 
 		points += 2
 		if opponent == "A" {
 			outcome = win
+		} else if opponent == "B" {
+			outcome = tie
 		}
 	case "Z":
 		// Played scissors which beats paper
 		points += 3
 		if opponent == "B" {
 			outcome = win
+		} else if opponent == "C" {
+			outcome = tie
 		}
 	case "X":
 		// Played rock which beats scissors
 		points += 1
 		if opponent == "C" {
 			outcome = win
+		} else if opponent == "A" {
+			outcome = tie
 		}
 	}
 
-	if outcome == win {
+	if input == opponent {
+		outcome = tie
+		points += 3
+	}
+
+	switch outcome {
+	case win:
 		points += 6
+	case tie:
+		points += 3
 	}
 
 	return outcome, points
@@ -97,11 +107,9 @@ func main() {
 			totalWins++
 		}
 		totalPoints += game.points
-		/*		fmt.Println("Game outcome: ", game.outcome)
-				fmt.Println("Points for game: ", game.points)
-				fmt.Println("")*/
 	}
 
+	fmt.Println("Total games: ", len(games))
 	fmt.Println("Total wins: ", totalWins)
 	fmt.Println("Total points: ", totalPoints)
 }
