@@ -23,9 +23,52 @@ const (
 	win
 )
 
+var equivalentMap = map[string]string{
+	"A": "X",
+	"B": "Y",
+	"C": "Z",
+}
+
+var winMap = map[string]string{
+	"A": "Y",
+	"B": "Z",
+	"C": "X",
+}
+
+var drawMap = map[string]string{
+	"A": "X",
+	"B": "Y",
+	"C": "Z",
+}
+
+var loseMap = map[string]string{
+	"A": "Z",
+	"B": "X",
+	"C": "Y",
+}
+
+func determineCorrectChoice(opponentChoice string, yourChoiceKey string) (translatedChoice string) {
+
+	switch yourChoiceKey {
+	case "X":
+		// You should lose
+		translatedChoice = loseMap[opponentChoice]
+	case "Y":
+		// You should draw
+		translatedChoice = drawMap[opponentChoice]
+	case "Z":
+		// You should win
+		translatedChoice = winMap[opponentChoice]
+	}
+
+	return translatedChoice
+}
+
 func calculateOutcomeAndPoints(input string, opponent string) (outcome outcome, points int) {
 
-	switch input {
+	translatedChoice := determineCorrectChoice(opponent, input)
+
+	switch translatedChoice {
 	case "Y":
 		// Played paper which beats rock
 		points += 2
