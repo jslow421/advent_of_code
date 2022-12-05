@@ -21,7 +21,9 @@ type Item struct {
 }
 
 type Group struct {
-	bags []Bag
+	bags       []Bag
+	groupType  string
+	groupScore int
 }
 
 var lowercaseMap = map[string]int{
@@ -117,8 +119,6 @@ func determineDuplicateItems(bag Bag) (dupes []Item) {
 				break
 			}
 		}
-
-		//alreadyAddedItems = nil
 	}
 	return dupes
 }
@@ -154,16 +154,6 @@ func determineItemsInCompartmentString(compartmentString string) (items []Item) 
 	return items
 }
 
-func calculateTotalDupeScore(bag Bag) (score int) {
-	totalScore := 0
-
-	for _, dupeItem := range bag.itemsInBothCompartments {
-		totalScore += dupeItem.priorityScore
-	}
-
-	return totalScore
-}
-
 func parseInputFile() (bags []Bag) {
 	f, err := os.Open("./2022/Day3/input.txt")
 
@@ -193,49 +183,34 @@ func parseInputFile() (bags []Bag) {
 	return bags
 }
 
-func determineItemsInAllCompartmentsOfAllBags(duplicateItems []Item, bags []Bag) (items []Item) {
-	hashedDupes := make(map[int]string)
-	returnItems := make(map[int]Item)
+func DetermineGroupType(bags []Bag) (groupType string) {
+	// append([]int{1,2}, []int{3,4}...)
+	firstBag := append(bags[0].firstCompartment, bags[0].secondCompartment...)
+	secondBag := append(bags[1].firstCompartment, bags[1].secondCompartment...)
+	thirdBag := append(bags[2].firstCompartment, bags[2].secondCompartment...)
 
-	for _, item := range duplicateItems {
-		hashedDupes[item.priorityScore] = item.value
-	}
-
-	for _, hashItem := range hashedDupes {
-		for _, bag := range bags {
-			for _, bagItem := range bag.itemsInBothCompartments {
-				if hashItem == bagItem.value {
-					//delete(hashedDupes, bagItem.priorityScore)
-					//items = append(items, bagItem)
-					returnItems[bagItem.priorityScore] = bagItem
-					break
+	for _, bag1 := range firstBag {
+		for _, bag2 := range secondBag {
+			if bag2.value == bag1.value {
+				for _, bag3 := range thirdBag {
+					if bag3.value == bag1.value {
+						groupType = bag1.value
+					}
 				}
 			}
 		}
 	}
 
-	for _, dedupedItems := range returnItems {
-		items = append(items, dedupedItems)
-	}
-
-	return items
+	return groupType
 }
 
 func main() {
 	sortedBags := parseInputFile()
 	dupeScore := 0
 	var groups []Group
-	//var duplicateItems []Item
+	groupScore := 0
 
 	for _, bag := range sortedBags {
-		/*		fmt.Println(index)
-				fmt.Println(bag.firstCompartment)
-				fmt.Println(bag.secondCompartment)
-				fmt.Println(bag.itemsInBothCompartments)
-				fmt.Println("")*/
-		//duplicateItems = append(duplicateItems, bag.itemsInBothCompartments...)
-		/*		fmt.Println("Dupe score: ", calculateTotalDupeScore(bag))
-				fmt.Println("")*/
 		for _, score := range bag.itemsInBothCompartments {
 			dupeScore += score.priorityScore
 		}
@@ -247,31 +222,31 @@ func main() {
 	for _, bag := range sortedBags {
 		bagsToadd = append(bagsToadd, bag)
 		count++
-		fmt.Println("Count: ", count)
 		if count == 3 {
 			newGroup := Group{
-				bags: bagsToadd,
+				bags:      bagsToadd,
+				groupType: DetermineGroupType(bagsToadd),
 			}
+			char := []rune(newGroup.groupType)
+			newGroup.groupScore = calculatePriorityScore(char[0])
 			groups = append(groups, newGroup)
 			bagsToadd = nil
 			count = 0
 		}
 	}
 
-	for index, group := range groups {
-		fmt.Println("Group index: ", index)
-		fmt.Println(group)
-		fmt.Println(group.bags)
-		fmt.Println("")
-
+	for _, group := range groups {
+		var duplicateItems []Item
+		for _, bag := range group.bags {
+			duplicateItems = append(duplicateItems, bag.itemsInBothCompartments...)
+		}
+		//groupItems := determineItemsInAllCompartmentsOfAllBags(duplicateItems, group.bags)
+		groupItem := DetermineGroupType(group.bags)
+		fmt.Println(groupItem)
+		fmt.Println("Group score: ", group.groupScore)
+		groupScore += group.groupScore
 	}
 
-	//value := determineItemsInAllCompartmentsOfAllBags(duplicateItems, sortedBags)
-
-	/*	for _, points := range value {
-		fmt.Println(points)
-		dupeScore += points.priorityScore
-	}*/
-
 	fmt.Println("Total dupe score: ", dupeScore)
+	fmt.Println("Total group score: ", groupScore)
 }
