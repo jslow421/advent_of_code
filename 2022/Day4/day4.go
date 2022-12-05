@@ -12,6 +12,7 @@ import (
 type ElfGroup struct {
 	assignedElves            []Elf
 	doesGroupEntirelyOverlap bool
+	doesGroupHaveAnyOverlap  bool
 }
 
 type Elf struct {
@@ -32,15 +33,24 @@ func doesGroupEntirelyOverlap(group ElfGroup) (doesEntirelyOverlap bool) {
 	elf1End := group.assignedElves[0].endArea
 	elf2Start := group.assignedElves[1].startArea
 	elf2End := group.assignedElves[1].endArea
-	//result := false
 
 	if ((elf1Start <= elf2Start) && (elf1End >= elf2End)) || ((elf2Start <= elf1Start) && (elf2End >= elf1End)) {
-		//result = true
 		doesEntirelyOverlap = true
 	}
 
-	//doesEntirelyOverlap = result
 	return doesEntirelyOverlap
+}
+
+func doesGroupHaveAnyOverlap(group ElfGroup) (isAnyOverlap bool) {
+	elf1Start := group.assignedElves[0].startArea
+	elf1End := group.assignedElves[0].endArea
+	elf2Start := group.assignedElves[1].startArea
+	elf2End := group.assignedElves[1].endArea
+
+	if (elf1Start >= elf2Start && elf1Start <= elf2End) || (elf2Start >= elf1Start && elf2Start <= elf1End) {
+		isAnyOverlap = true
+	}
+	return isAnyOverlap
 }
 
 func processElfPairs(rawLine string) (group ElfGroup) {
@@ -61,6 +71,7 @@ func processElfPairs(rawLine string) (group ElfGroup) {
 	group.assignedElves = append(group.assignedElves, elf1)
 	group.assignedElves = append(group.assignedElves, elf2)
 	group.doesGroupEntirelyOverlap = doesGroupEntirelyOverlap(group)
+	group.doesGroupHaveAnyOverlap = doesGroupHaveAnyOverlap(group)
 
 	return group
 }
@@ -89,13 +100,18 @@ func parseInputFile() (groups []ElfGroup) {
 
 func main() {
 	groups := parseInputFile()
-	totalWithOverlap := 0
+	totalWithCompleteOverlap := 0
+	totalWithAnyOverlap := 0
 
 	for _, group := range groups {
-		if group.doesGroupEntirelyOverlap == true {
-			totalWithOverlap++
+		if group.doesGroupEntirelyOverlap {
+			totalWithCompleteOverlap++
+		}
+		if group.doesGroupHaveAnyOverlap {
+			totalWithAnyOverlap++
 		}
 	}
 
-	fmt.Println("Total groups with overlap: ", totalWithOverlap)
+	fmt.Println("Total groups with complete overlap: ", totalWithCompleteOverlap)
+	fmt.Println("Total groups with any overlap: ", totalWithAnyOverlap)
 }
